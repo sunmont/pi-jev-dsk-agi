@@ -1,6 +1,11 @@
-# 🧠 Pi-JEV-DSK AGI Agentic Architecture
+# 🧠 Pi-JEV-DSK Enterprise AGI Agentic Architecture
 
-A modern, production-grade boilerplate demonstrating an advanced AGI agent architecture integrating **Pi-calculus process channels**, **Just-in-Time Evaluation & Vector (JEV)** engines, and **Deep State Kernels (DSK)**, paired with an interactive **Nuxt.js 3 (Vue 3)** control center.
+A production-grade boilerplate and control center for next-generation AGI agents powered by real enterprise AI primitives:
+* **`@deepseek-ai/cordis`** for modular dependency injection and service containerization.
+* **`@earendil-works/pi-ai`**, **`pi-agent-core`**, and **`pi-coding-agent`** for autonomous Pi agent reasoning and coding workflows.
+* **`@typesafe-ai/jev`** for strict type-safe Just-in-Time evaluation and vector memory retrieval.
+* **Deep State Kernel (DSK)** for multi-stage reasoning, planning, and verification loops.
+* **Nuxt.js 3 / Vue 3** for an interactive real-time control center UI.
 
 ---
 
@@ -14,13 +19,14 @@ A modern, production-grade boilerplate demonstrating an advanced AGI agent archi
                              │ REST / JSON
                              ▼
  ┌────────────────────────────────────────────────────────┐
- │                TypeScript Backend Core                 │
+ │            TypeScript Cordis Service Container         │
  │                                                        │
  │  ┌─────────────────┐   ┌─────────────────┐             │
- │  │ Pi Router       │◄──┤ JEV Engine      │             │
- │  │ (Process Chans) │   │ (VM Sandbox &   │             │
- │  └────────┬────────┘   │  Vector Memory) │             │
- │           │            └────────┬────────┘             │
+ │  │ Pi Coding Agent │◄──┤ JEV Runtime     │             │
+ │  │ (@earendil-works│   │ (@typesafe-ai/  │             │
+ │  │  pi-coding-agent│   │  jev)           │             │
+ │  └────────┬────────┘   └────────┬────────┘             │
+ │           │                     │                      │
  │           └──────────┐          │                      │
  │                      ▼          ▼                      │
  │                ┌───────────────────────┐               │
@@ -30,32 +36,19 @@ A modern, production-grade boilerplate demonstrating an advanced AGI agent archi
  └────────────────────────────────────────────────────────┘
 ```
 
-### 1. Pi Agents (`backend/src/pi-router.ts`)
-* Inspired by $\pi$-calculus process calculi.
-* Replaces rigid DAG pipelines with dynamic, mobile message channels where agents can subscribe, publish, and migrate across topologies on the fly.
-
-### 2. JEV Engine (`backend/src/jev-engine.ts`)
-* **Just-in-Time Evaluation:** Securely compiles and executes agent-generated logic inside isolated Node.js `vm` sandboxes.
-* **Vector Memory:** Instant semantic retrieval and scoring for contextual grounding.
-
-### 3. DSK Kernel (`backend/src/dsk-kernel.ts`)
-* **Deep State Kernel:** The cognitive orchestrator enforcing a rigorous 4-stage reasoning loop:
-  1. **Perception:** Ingesting and embedding objectives.
-  2. **Reasoning:** Formulating task graphs.
-  3. **Execution:** Running sandboxed workloads.
-  4. **Verification:** Validating constraints and self-healing upon errors.
-
 ---
 
 ## 📁 Repository Structure
 
 ```tree
-├── backend/            # TypeScript Express backend (Pi, JEV, DSK)
+├── backend/            # TypeScript Express backend (Cordis, Pi, JEV, DSK)
 │   ├── src/
-│   │   ├── dsk-kernel.ts
-│   │   ├── jev-engine.ts
-│   │   ├── index.ts
-│   │   └── pi-router.ts
+│   │   ├── app-container.ts   # Cordis service container
+│   │   ├── dsk-kernel.ts      # DSK reasoning loop
+│   │   ├── jev-engine.ts      # @typesafe-ai/jev runtime
+│   │   ├── pi-router.ts       # @earendil-works Pi coding agent
+│   │   ├── services.ts        # Cordis type definitions
+│   │   └── index.ts           # Express server bootstrap
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/           # Nuxt.js 3 / Vue 3 Control Center UI
@@ -100,7 +93,7 @@ pnpm install
    ```
 
 3. **Explore:**
-   Open `http://localhost:3000` in your browser to submit AGI goals and inspect real-time DSK reasoning traces.
+   Open `http://localhost:3000` in your browser to submit AGI goals and inspect real-time DSK reasoning traces powered by Cordis, Pi agents, and JEV.
 
 ---
 
