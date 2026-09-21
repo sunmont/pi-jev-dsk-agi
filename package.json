@@ -1,0 +1,10 @@
+{
+  "name": "agi-agent-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "pnpm --filter backend install && pnpm --filter frontend install",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev"
+  }
+}
