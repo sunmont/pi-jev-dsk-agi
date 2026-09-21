@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize Cordis AGI Container with Cordis, Pi, JEV, and DSK
+// Initialize Cordis AGI Container
 const agiApp = createAgiApp();
 agiApp.start();
 

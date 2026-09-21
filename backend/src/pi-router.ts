@@ -1,26 +1,47 @@
 import { EventEmitter } from 'events';
-import { PiMessage, AgentRole } from '../shared/types';
+import { PiAgentCore } from '@earendil-works/pi-agent-core';
+import { PiCodingAgent } from '@earendil-works/pi-coding-agent';
+import { PiAiClient } from '@earendil-works/pi-ai';
 
 export class PiChannelRouter extends EventEmitter {
-  private channels: Map<string, Set<string>> = new Map(); // channel -> set of agentIds
-  private mailbox: PiMessage[] = [];
+  private agentCore: PiAgentCore;
+  private codingAgent: PiCodingAgent;
+  private mailbox: any[] = [];
 
-  public subscribe(channel: string, agentId: string) {
-    if (!this.channels.has(channel)) {
-      this.channels.set(channel, new Set());
-    }
-    this.channels.get(channel)!.add(agentId);
-    console.log(`[Pi Router] Agent ${agentId} subscribed to channel: ${channel}`);
+  constructor() {
+    super();
+    const piClient = new PiAiClient({
+      apiKey: process.env.DEEPSEEK_API_KEY || 'dummy-key',
+      baseURL: 'https://api.deepseek.com/v1',
+    });
+
+    this.agentCore = new PiAgentCore({
+      client: piClient,
+      model: 'deepseek-chat',
+    });
+
+    this.codingAgent = new PiCodingAgent({
+      core: this.agentCore,
+      workspace: process.cwd(),
+    });
   }
 
-  public publish(message: PiMessage) {
+  public async dispatch(taskPrompt: string): Promise<any> {
+    const message = {
+      id: 'msg-' + Date.now(),
+      sender: 'pi-router',
+      receiver: 'coding-agent',
+      channel: 'execution-channel',
+      payload: taskPrompt,
+      timestamp: Date.now()
+    };
     this.mailbox.push(message);
-    console.log(`[Pi Router] Msg on [${message.channel}] from ${message.sender} to ${message.receiver}`);
-    this.emit(`channel:${message.channel}`, message);
-    this.emit(`agent:${message.receiver}`, message);
+    this.emit('message', message);
+
+    return await this.codingAgent.executeTask({ prompt: taskPrompt });
   }
 
-  public getMailbox(): PiMessage[] {
+  public getMailbox(): any[] {
     return this.mailbox;
   }
 }

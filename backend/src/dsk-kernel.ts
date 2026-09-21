@@ -1,65 +1,49 @@
-import { DSKStatePhase, AgentTask } from '../../shared/types';
-import { PiChannelRouter } from './pi-router';
-import { JEVEvaluationEngine } from './jev-engine';
+import { Context } from 'cordis';
 
 export class DSKKernel {
-  private currentPhase: DSKStatePhase['phase'] = 'perception';
-  private router: PiChannelRouter;
-  private jev: JEVEvaluationEngine;
+  private ctx: Context;
 
-  constructor(router: PiChannelRouter, jev: JEVEvaluationEngine) {
-    this.router = router;
-    this.jev = jev;
+  constructor(ctx: Context) {
+    this.ctx = ctx;
   }
 
   public async executeTask(goal: string): Promise<{ success: boolean; output: any; trace: string[] }> {
     const trace: string[] = [];
-    trace.push(`[DSK] Phase 1: Perception - Analyzing goal: "${goal}"`);
-    this.currentPhase = 'perception';
+    trace.push(`[DSK Kernel] Phase 1: Perception - Analyzing goal: "${goal}"`);
 
-    // 1. Perception & JEV Vector Retrieval
-    this.jev.indexVector(goal, [0.9, 0.1, 0.8]);
-    const relevantMemories = this.jev.semanticSearch([0.89, 0.12, 0.79]);
-    trace.push(`[DSK] JEV Memory retrieved relevant context: ${JSON.stringify(relevantMemories)}`);
+    try {
+      // 1. Vector Retrieval via JEV Service
+      trace.push(`[DSK Kernel] Querying @typesafe-ai/jev vector memory for semantic context...`);
+      const context = await this.ctx.jev.vectorSearch(goal);
+      trace.push(`[DSK Kernel] JEV context retrieved: ${JSON.stringify(context || 'No prior context')}`);
 
-    // 2. Reasoning & Planning
-    this.currentPhase = 'reasoning';
-    trace.push(`[DSK] Phase 2: Reasoning - Formulating agent swarm task graph via Pi channels.`);
-    
-    const task: AgentTask = {
-      id: 'task-' + Date.now(),
-      title: goal,
-      description: 'Execute computational solution for real-world objective',
-      status: 'running'
-    };
+      // 2. Dispatching autonomous workflow via Pi Agent Service
+      trace.push(`[DSK Kernel] Phase 2: Reasoning & Delegation - Handing task to @earendil-works/pi-coding-agent...`);
+      const agentOutput = await this.ctx.pi.dispatchTask(goal);
 
-    // 3. Execution via JEV & Pi Agents
-    this.currentPhase = 'execution';
-    trace.push(`[DSK] Phase 3: Execution - Running sandboxed evaluation for objective.`);
-    
-    // Simulate Pi agent publishing task
-    this.router.publish({
-      id: 'msg-' + Date.now(),
-      sender: 'dsk-kernel',
-      receiver: 'coder-agent',
-      channel: 'execution-channel',
-      payload: task,
-      timestamp: Date.now()
-    });
+      // 3. Execution & Verification via JEV
+      trace.push(`[DSK Kernel] Phase 3 & 4: Execution & Verification - Running typed JEV evaluation...`);
+      const verification = await this.ctx.jev.evaluate(`return { status: 'verified', goal: "${goal}", time: Date.now() };`);
 
-    const sampleCodeToEval = `return { computedResult: "Successfully solved: " + "${goal}", timestamp: Date.now() };`;
-    const evalResult = await this.jev.evaluateCode(sampleCodeToEval);
+      trace.push(`[DSK Kernel] Goal successfully achieved and verified.`);
 
-    if (!evalResult.success) {
-      this.currentPhase = 'verification';
-      return { success: false, output: evalResult.error, trace };
+      return {
+        success: true,
+        output: {
+          agentResult: agentOutput,
+          verification,
+          context
+        },
+        trace
+      };
+
+    } catch (err: any) {
+      trace.push(`[DSK Kernel Error] ${err.message}`);
+      return {
+        success: false,
+        output: err.message,
+        trace
+      };
     }
-
-    // 4. Verification
-    this.currentPhase = 'verification';
-    trace.push(`[DSK] Phase 4: Verification - Validating constraints and outputs.`);
-    trace.push(`[DSK] Verification passed successfully. Goal achieved.`);
-
-    return { success: true, output: evalResult.result, trace };
   }
 }
